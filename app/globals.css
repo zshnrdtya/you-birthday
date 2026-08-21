@@ -1,26 +1,100 @@
 @import "tailwindcss";
 
+/* ── Base Theme Tokens ─────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #e0f2fe; /* sky-100 */
+  --foreground: #0c4a6e; /* sky-900 */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ── Body Reset ─────────────────────────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* ── Hardware Accelerated CSS Particle Animation (Lighthouse 90+ Target) ── */
+@keyframes floatDownSlow {
+  0% {
+    transform: translate3d(0, -60px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.75;
+  }
+  85% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate3d(24px, 108vh, 0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes floatDownSway {
+  0% {
+    transform: translate3d(0, -60px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate3d(-20px, 50vh, 0) rotate(180deg);
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(15px, 108vh, 0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.floating-petal-1 {
+  will-change: transform, opacity;
+  animation: floatDownSlow 14s linear infinite;
+}
+
+.floating-petal-2 {
+  will-change: transform, opacity;
+  animation: floatDownSway 17s linear infinite;
+}
+
+.floating-petal-3 {
+  will-change: transform, opacity;
+  animation: floatDownSlow 20s linear infinite;
+}
+
+.floating-petal-4 {
+  will-change: transform, opacity;
+  animation: floatDownSway 15s linear infinite;
+}
+
+/* ── Lightweight CSS Shake Animation (Zero JS runtime) ─────────── */
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.animate-shake {
+  animation: shakeError 0.45s ease-in-out;
+}
+
+/* ── Lightweight Glassmorphism Utilities (GPU Friendly) ────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.glass-popup {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.75);
 }

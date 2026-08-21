@@ -10,7 +10,7 @@ import PasscodeFlow from "./components/PasscodeFlow";
  */
 export default function Home() {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-sky-300 via-sky-100 to-blue-50 relative flex flex-col justify-between overflow-x-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-b from-purple-300 via-purple-100 to-pink-50 relative flex flex-col justify-between overflow-x-hidden">
       {/* ── Server-Rendered Pure CSS Particles (Zero JS cost) ── */}
       <FloatingParticles />
 
@@ -21,8 +21,8 @@ export default function Home() {
 
       {/* ── Server-Rendered Static Footer ── */}
       <footer className="py-6 px-4 text-center relative z-10">
-        <p className="text-xs text-sky-800/70 font-medium tracking-wide">
-          Dibuat Oleh <span className="font-bold text-sky-900">Raditya Rai Zeeshan</span>
+        <p className="text-xs text-purple-800/70 font-medium tracking-wide">
+          Dibuat Oleh <span className="font-bold text-purple-900">Raditya Rai Zeeshan</span>
         </p>
       </footer>
     </div>

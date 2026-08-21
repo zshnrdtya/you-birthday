@@ -10,7 +10,7 @@ const GiftBoxSection = dynamic(() => import("./GiftBoxSection"), {
   ssr: false,
   loading: () => (
     <div className="flex flex-col items-center justify-center py-16">
-      <div className="w-10 h-10 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
+      <div className="w-10 h-10 rounded-full border-2 border-purple-400 border-t-transparent animate-spin" />
     </div>
   ),
 });
@@ -79,11 +79,11 @@ export default function PasscodeFlow() {
             }`}
           >
             {/* Header */}
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-sky-900 tracking-tight">
-                Untuk Kamu, Zalfa Ramadani 💙
+            <div className="text-center w-full">
+              <h1 className="text-lg sm:text-xl font-bold text-purple-900 tracking-tight whitespace-nowrap">
+                Untuk Kamu, Zalfa Ramadani 💜
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-sky-700/80">
+              <p className="mt-1 text-xs sm:text-sm text-purple-700/80">
                 Masukkan kode rahasianya
               </p>
             </div>
@@ -97,8 +97,8 @@ export default function PasscodeFlow() {
                     i < entered.length
                       ? error
                         ? "bg-red-400 border-red-400 scale-110"
-                        : "bg-sky-500 border-sky-500 scale-105"
-                      : "bg-transparent border-sky-400/60"
+                        : "bg-purple-500 border-purple-500 scale-105"
+                      : "bg-transparent border-purple-400/60"
                   }`}
                 />
               ))}
@@ -123,7 +123,7 @@ export default function PasscodeFlow() {
                       key={idx}
                       onClick={handleDelete}
                       type="button"
-                      className="flex items-center justify-center h-13 sm:h-14 rounded-2xl text-sky-700 bg-white/30 hover:bg-white/50 active:scale-95 transition-all border border-white/50"
+                      className="flex items-center justify-center h-13 sm:h-14 rounded-2xl text-purple-700 bg-white/30 hover:bg-white/50 active:scale-95 transition-all border border-white/50"
                       aria-label="Hapus"
                     >
                       <Delete size={20} />
@@ -135,7 +135,7 @@ export default function PasscodeFlow() {
                     key={idx}
                     onClick={() => handleKey(key)}
                     type="button"
-                    className="flex items-center justify-center h-13 sm:h-14 rounded-2xl text-xl font-semibold text-sky-900 bg-white/40 hover:bg-white/60 active:scale-95 transition-all border border-white/60 shadow-sm"
+                    className="flex items-center justify-center h-13 sm:h-14 rounded-2xl text-xl font-semibold text-purple-900 bg-white/40 hover:bg-white/60 active:scale-95 transition-all border border-white/60 shadow-sm"
                   >
                     {key}
                   </button>
@@ -144,7 +144,7 @@ export default function PasscodeFlow() {
             </div>
 
             {/* Hint */}
-            <p className="text-xs text-sky-600/70 text-center italic">
+            <p className="text-xs text-purple-600/70 text-center italic">
               Petunjuk: 050909 🗓
             </p>
           </div>
@@ -156,18 +156,18 @@ export default function PasscodeFlow() {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 transition-all duration-300">
           <div
             className="w-full max-w-sm rounded-3xl p-8 flex flex-col items-center text-center gap-6 glass-popup shadow-2xl animate-fade-in"
-            style={{ boxShadow: "0 12px 40px rgba(56, 132, 255, 0.18)" }}
+            style={{ boxShadow: "0 12px 40px rgba(168, 85, 247, 0.18)" }}
           >
             <div className="text-5xl animate-bounce select-none">
               ✨🎂✨
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-sky-900 tracking-tight leading-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-purple-900 tracking-tight leading-tight">
                 HAPPY BIRTHDAY ZALFAAAA 🎉✨
               </h2>
-              <p className="text-xs sm:text-sm text-sky-700/85 leading-relaxed">
-                Cieee yang umurnya nambah! Gua udah nyiapin kejutan kecil nih khusus buat lu hari ini, dibuka dan semoga suka yaa 💙
+              <p className="text-xs sm:text-sm text-purple-700/85 leading-relaxed">
+                Cieee yang umurnya nambah! Gua udah nyiapin kejutan kecil nih khusus buat lu hari ini, dibuka dan semoga suka yaa 💜
               </p>
             </div>
 
@@ -176,8 +176,8 @@ export default function PasscodeFlow() {
               type="button"
               className="w-full py-3.5 px-6 rounded-2xl font-semibold text-white shadow-lg active:scale-95 transition-transform"
               style={{
-                background: "linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)",
-                boxShadow: "0 8px 24px rgba(56, 189, 248, 0.35)",
+                background: "linear-gradient(135deg, #c084fc 0%, #a855f7 100%)",
+                boxShadow: "0 8px 24px rgba(168, 85, 247, 0.35)",
               }}
             >
               Ada kado buat kamu 🎁

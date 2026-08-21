@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import CandleSection from "./CandleSection";
+import PhotoGallery from "./PhotoGallery";
 
 interface Sparkle {
   id: number;
@@ -9,8 +11,8 @@ interface Sparkle {
   y: number;
 }
 
-// Path foto yang akan ditampilkan saat kotak dibuka (taruh file di public/photos/foto_kado.jpg)
-const PHOTO_SRC = "/photos/foto_kado.jpg";
+// Path foto yang akan ditampilkan saat kotak dibuka
+const PHOTO_SRC = "/photos/foto4.jpeg";
 
 const FULL_MESSAGE = `eh tapi coba lu inget inget dulu deh... sekarang tanggal berapa? tanggal 5 kan? terus hari apa? sabtu ya? iya betul banget wkwkwk, dan yang lebih penting lagi... tepat banget hari ini lu ulang tahun kannnn 😭🎉 jadi hari ini officially jadi hari spesial buat lu, dan gua mau ngucapin happy birthday buat lu.
 
@@ -123,14 +125,14 @@ export default function GiftBoxSection() {
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
                 border: "1px solid rgba(255, 255, 255, 0.85)",
-                boxShadow: "0 12px 35px -8px rgba(12, 74, 110, 0.2)",
+                boxShadow: "0 12px 35px -8px rgba(88, 28, 135, 0.15)",
               }}
             >
               {/* Frame Foto */}
               <div
                 className="w-56 h-64 sm:w-64 sm:h-72 rounded-2xl overflow-hidden relative flex items-center justify-center shadow-inner"
                 style={{
-                  background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)",
+                  background: "linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)",
                 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -149,9 +151,9 @@ export default function GiftBoxSection() {
                 {/* Fallback Placeholder jika belum ada foto di folder */}
                 <div className="photo-fallback hidden flex flex-col items-center justify-center text-center p-4">
                   <span className="text-5xl mb-2">📸</span>
-                  <p className="text-xs text-sky-800 font-semibold leading-relaxed">
+                  <p className="text-xs text-purple-800 font-semibold leading-relaxed">
                     Taruh foto di: <br />
-                    <code className="bg-white/80 px-2 py-0.5 rounded text-[11px] mt-1.5 inline-block text-sky-900 font-mono shadow-sm">
+                    <code className="bg-white/80 px-2 py-0.5 rounded text-[11px] mt-1.5 inline-block text-purple-900 font-mono shadow-sm">
                       public/photos/foto_kado.jpg
                     </code>
                   </p>
@@ -176,7 +178,7 @@ export default function GiftBoxSection() {
         <AnimatePresence>
           {!opened && (
             <motion.p
-              className="mt-3 text-sm text-sky-600/80 font-medium text-center"
+              className="mt-3 text-sm text-purple-600/80 font-medium text-center"
               exit={{ opacity: 0, y: -8 }}
             >
               Ketuk kotak hadiah ini yukkkk, buat liat ada apa isinya HAHAH
@@ -192,7 +194,7 @@ export default function GiftBoxSection() {
             key="reveal"
             className="w-full max-w-sm rounded-3xl p-7 text-center glass-card"
             style={{
-              boxShadow: "0 8px 32px rgba(56,132,255,0.12)",
+              boxShadow: "0 8px 32px rgba(147, 51, 234, 0.12)",
             }}
             initial={{ opacity: 0, scale: 0.8, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -205,17 +207,17 @@ export default function GiftBoxSection() {
             >
               🎉🎂
             </motion.div>
-            <h2 className="text-xl font-bold text-sky-800 leading-tight">
+            <h2 className="text-xl font-bold text-purple-800 leading-tight">
               Selamat Ulang Tahun,
             </h2>
-            <h2 className="text-xl font-bold text-sky-600 leading-tight mb-4">
+            <h2 className="text-xl font-bold text-purple-600 leading-tight mb-4">
               Zalfa Ramadani! 🎉🎂
             </h2>
 
             {/* Isi ucapan dengan typewriter animation */}
             <div
               onClick={handleSkipTyping}
-              className="text-sm text-sky-700/85 leading-relaxed text-justify space-y-3 cursor-pointer select-text"
+              className="text-sm text-purple-700/85 leading-relaxed text-justify space-y-3 cursor-pointer select-text"
               title={isTyping ? "Ketuk untuk langsung menampilkan semua teks" : ""}
             >
               {paragraphs.map((paragraph, index) => {
@@ -224,7 +226,7 @@ export default function GiftBoxSection() {
                   <p key={index}>
                     {paragraph}
                     {isLastParagraph && isTyping && (
-                      <span className="inline-block font-mono text-sky-500 font-bold animate-pulse ml-0.5">
+                      <span className="inline-block font-mono text-purple-500 font-bold animate-pulse ml-0.5">
                         |
                       </span>
                     )}
@@ -238,13 +240,23 @@ export default function GiftBoxSection() {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="text-center font-semibold text-sky-700 pt-2 italic"
+                  className="text-center font-semibold text-purple-700 pt-2 italic"
                 >
                   from Raditya
                 </motion.p>
               )}
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Section Tiup Lilin & Confetti (Muncul setelah surat selesai dibaca) */}
+      <AnimatePresence>
+        {opened && displayedLength >= FULL_MESSAGE.length && (
+          <>
+            <CandleSection />
+            <PhotoGallery />
+          </>
         )}
       </AnimatePresence>
     </section>

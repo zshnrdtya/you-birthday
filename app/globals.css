@@ -2,8 +2,8 @@
 
 /* ── Base Theme Tokens ─────────────────────────────────────────── */
 :root {
-  --background: #e0f2fe; /* sky-100 */
-  --foreground: #0c4a6e; /* sky-900 */
+  --background: #faf5ff; /* purple-50 */
+  --foreground: #581c87; /* purple-900 */
   --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
 }
 

@@ -72,7 +72,7 @@ export default function BackgroundMusic({ autoPlayTrigger }: BackgroundMusicProp
             WebkitBackdropFilter: "blur(16px)",
             border: "1px solid rgba(255, 255, 255, 0.6)",
             boxShadow: isPlaying
-              ? "0 4px 20px rgba(56, 189, 248, 0.25)"
+              ? "0 4px 20px rgba(168, 85, 247, 0.25)"
               : "0 4px 12px rgba(0, 0, 0, 0.05)",
           }}
           aria-label={isPlaying ? "Matikan musik" : "Putar musik"}
@@ -85,16 +85,16 @@ export default function BackgroundMusic({ autoPlayTrigger }: BackgroundMusicProp
               duration: 4,
               ease: "linear",
             }}
-            className="text-sky-600 flex items-center justify-center"
+            className="text-purple-600 flex items-center justify-center"
           >
             <Music size={15} />
           </motion.div>
 
-          <span className="text-xs font-semibold text-sky-900 hidden sm:inline-block">
+          <span className="text-xs font-semibold text-purple-900 hidden sm:inline-block">
             {isPlaying ? "Shape of My Heart" : "Putar Musik"}
           </span>
 
-          <div className="text-sky-700">
+          <div className="text-purple-700">
             {isPlaying ? <Volume2 size={15} /> : <VolumeX size={15} />}
           </div>
         </motion.button>

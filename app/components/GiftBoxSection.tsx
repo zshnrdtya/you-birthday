@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import CandleSection from "./CandleSection";
 import PhotoGallery from "./PhotoGallery";
 import BirthdayCertificate from "./BirthdayCertificate";
+import GrandFinaleOutro from "./GrandFinaleOutro";
 
 interface Sparkle {
   id: number;
@@ -251,13 +252,14 @@ export default function GiftBoxSection() {
         )}
       </AnimatePresence>
 
-      {/* Section Tiup Lilin, Galeri Foto & Piagam Penghargaan (Muncul setelah surat selesai dibaca) */}
+      {/* Section Tiup Lilin, Galeri Foto, Piagam Penghargaan & Grand Finale Outro */}
       <AnimatePresence>
         {opened && displayedLength >= FULL_MESSAGE.length && (
           <>
             <CandleSection />
             <PhotoGallery />
             <BirthdayCertificate />
+            <GrandFinaleOutro />
           </>
         )}
       </AnimatePresence>

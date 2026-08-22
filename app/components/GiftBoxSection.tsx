@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CandleSection from "./CandleSection";
 import PhotoGallery from "./PhotoGallery";
+import BirthdayCertificate from "./BirthdayCertificate";
 
 interface Sparkle {
   id: number;
@@ -250,12 +251,13 @@ export default function GiftBoxSection() {
         )}
       </AnimatePresence>
 
-      {/* Section Tiup Lilin & Confetti (Muncul setelah surat selesai dibaca) */}
+      {/* Section Tiup Lilin, Galeri Foto & Piagam Penghargaan (Muncul setelah surat selesai dibaca) */}
       <AnimatePresence>
         {opened && displayedLength >= FULL_MESSAGE.length && (
           <>
             <CandleSection />
             <PhotoGallery />
+            <BirthdayCertificate />
           </>
         )}
       </AnimatePresence>

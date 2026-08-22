@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Volume2, VolumeX, Music } from "lucide-react";
 
@@ -9,39 +9,129 @@ interface BackgroundMusicProps {
 }
 
 /**
- * BackgroundMusic Component
+ * BackgroundMusic Component (Robust Audio Lifecycle Management)
  * - Plays /audio/shapeofmyheart.mp3 in loop
- * - Automatically triggers playback on first valid user interaction / unlock
- * - Provides a floating glassmorphism play/pause toggle button at top-right
+ * - Automatically pauses when browser/tab is hidden, minimized, switched, or closed
+ *   (resolves iOS Safari / Chrome background playback issue)
+ * - Syncs with Page Lifecycle, visibilitychange, pagehide, and beforeunload events
+ * - Syncs with MediaSession API & native audio events
+ * - Floating glassmorphism play/pause toggle button at top-right
  */
 export default function BackgroundMusic({ autoPlayTrigger }: BackgroundMusicProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const isManuallyPausedRef = useRef(false);
+  const wasPlayingBeforeHiddenRef = useRef(false);
 
-  // Auto-play when trigger is enabled (e.g. after entering PIN)
+  // Synchronize state and setup Page Lifecycle / Background listeners
   useEffect(() => {
-    if (autoPlayTrigger && audioRef.current && !isPlaying) {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // Native audio event listeners for state integrity
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
+
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("ended", handleEnded);
+
+    // 1. Visibility Change: Stop audio when user leaves tab, switches app, or locks phone
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (!audio.paused) {
+          wasPlayingBeforeHiddenRef.current = true;
+          audio.pause();
+        }
+      } else {
+        // User came back to the tab
+        if (wasPlayingBeforeHiddenRef.current && !isManuallyPausedRef.current) {
+          wasPlayingBeforeHiddenRef.current = false;
+          audio.play().catch(() => {
+            // Browser autoplay restrictions may block automatic resume
+          });
+        }
+      }
+    };
+
+    // 2. Page Hide & Unload: Ensure audio is immediately paused when closing or navigating
+    const handlePageHide = () => {
+      audio.pause();
+      wasPlayingBeforeHiddenRef.current = false;
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.playbackState = "paused";
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      audio.pause();
+    };
+
+    // 3. MediaSession support (sync with OS lock screen controls)
+    if ("mediaSession" in navigator) {
+      try {
+        navigator.mediaSession.setActionHandler("play", () => {
+          isManuallyPausedRef.current = false;
+          audio.play().catch(console.error);
+        });
+        navigator.mediaSession.setActionHandler("pause", () => {
+          isManuallyPausedRef.current = true;
+          audio.pause();
+        });
+        navigator.mediaSession.setActionHandler("stop", () => {
+          isManuallyPausedRef.current = true;
+          audio.pause();
+        });
+      } catch (e) {
+        // Ignore unsupported action handler errors
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("freeze", handlePageHide);
+
+    return () => {
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("ended", handleEnded);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("freeze", handlePageHide);
+
+      // Explicit cleanup on unmount
+      audio.pause();
+    };
+  }, []);
+
+  // Auto-play trigger when unlocked (e.g. from Passcode step)
+  useEffect(() => {
+    if (autoPlayTrigger && audioRef.current && !isManuallyPausedRef.current) {
       audioRef.current
         .play()
-        .then(() => setIsPlaying(true))
+        .then(() => {
+          setIsPlaying(true);
+        })
         .catch(() => {
           // Autoplay policy prevented playback until explicit click
         });
     }
   }, [autoPlayTrigger]);
 
-  const toggleMusic = () => {
+  const toggleMusic = useCallback(() => {
     if (!audioRef.current) return;
     if (isPlaying) {
+      isManuallyPausedRef.current = true;
+      wasPlayingBeforeHiddenRef.current = false;
       audioRef.current.pause();
-      setIsPlaying(false);
     } else {
-      audioRef.current
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(console.error);
+      isManuallyPausedRef.current = false;
+      audioRef.current.play().catch(console.error);
     }
-  };
+  }, [isPlaying]);
 
   return (
     <>
@@ -49,7 +139,7 @@ export default function BackgroundMusic({ autoPlayTrigger }: BackgroundMusicProp
         ref={audioRef}
         src="/audio/shapeofmyheart.mp3"
         preload="auto"
-        onEnded={() => setIsPlaying(false)}
+        loop
       />
 
       {/* Floating Glassmorphism Music Toggle Button */}

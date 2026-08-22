@@ -20,9 +20,9 @@ export default function Home() {
       </div>
 
       {/* ── Server-Rendered Static Footer ── */}
-      <footer className="py-6 px-4 text-center relative z-10">
-        <p className="text-xs text-purple-800/70 font-medium tracking-wide">
-          Dibuat Oleh <span className="font-bold text-purple-900">Raditya Rai Zeeshan</span>
+      <footer className="py-5 px-4 text-center relative z-50">
+        <p className="text-xs text-neutral-900 font-medium tracking-wide">
+          Dibuat Oleh <span className="font-bold text-black">Raditya Rai Zeeshan</span>
         </p>
       </footer>
     </div>

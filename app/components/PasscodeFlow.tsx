@@ -92,7 +92,7 @@ export default function PasscodeFlow() {
 
       {/* ── STEP 1: Passcode Screen with 9:16 Photo Frame & Purple Ambient BG ── */}
       {step === 1 && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center px-4 pb-12 overflow-hidden bg-gradient-to-b from-purple-950 via-purple-900 to-indigo-950">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 min-h-[100dvh] overflow-hidden bg-gradient-to-b from-purple-950 via-purple-900 to-indigo-950">
           {/* ── Ambient Blurred Backlight (Matches Active Photo Colors) ── */}
           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             <AnimatePresence mode="popLayout">
@@ -116,18 +116,18 @@ export default function PasscodeFlow() {
             <div className="absolute inset-0 bg-purple-950/50 backdrop-blur-xl" />
           </div>
 
-          {/* ── Floating 9:16 Portrait Photo Frame Container ── */}
+          {/* ── Floating 9:16 Portrait Photo Frame Container (Perfect Center) ── */}
           <motion.div
             animate={{
-              y: [0, -8, 0],
-              rotate: [-0.6, 0.6, -0.6],
+              y: [-4, 4, -4],
+              rotate: [-0.5, 0.5, -0.5],
             }}
             transition={{
               repeat: Infinity,
-              duration: 6,
+              duration: 5,
               ease: "easeInOut",
             }}
-            className="relative z-10 w-full max-w-[370px] aspect-[9/16] max-h-[86vh] rounded-[2.2rem] p-2 shadow-2xl flex flex-col items-center justify-between overflow-hidden"
+            className="relative z-10 w-full max-w-[340px] sm:max-w-[365px] aspect-[9/16] max-h-[84dvh] sm:max-h-[86dvh] rounded-[2.2rem] p-2 sm:p-2.5 shadow-2xl flex flex-col items-center justify-between overflow-hidden"
             style={{
               background:
                 "linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(192, 132, 252, 0.25) 50%, rgba(244, 114, 182, 0.3) 100%)",
@@ -163,7 +163,7 @@ export default function PasscodeFlow() {
             </div>
 
             {/* Top Indicator & Label inside Frame */}
-            <div className="relative z-20 w-full pt-3 px-3 flex items-center justify-between">
+            <div className="relative z-20 w-full pt-2 sm:pt-3 px-3 flex items-center justify-between">
               <span className="text-[10px] font-semibold text-white/90 bg-black/35 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/25 shadow-xs">
                 📸 {currentPhotoIdx + 1}/6 • Zalfa ✨
               </span>
@@ -185,7 +185,7 @@ export default function PasscodeFlow() {
 
             {/* ── Keypad Ultra-Transparent Glass Card (Black Text & Numbers) ── */}
             <div
-              className={`relative z-20 w-full p-4 sm:p-5 rounded-3xl flex flex-col items-center gap-3.5 transition-all duration-300 ${
+              className={`relative z-20 w-full p-3.5 sm:p-4.5 rounded-3xl flex flex-col items-center gap-2.5 sm:gap-3 transition-all duration-300 ${
                 shake ? "animate-shake" : ""
               }`}
               style={{
@@ -198,20 +198,20 @@ export default function PasscodeFlow() {
             >
               {/* Header */}
               <div className="text-center w-full">
-                <h1 className="text-base sm:text-lg font-black text-black tracking-tight whitespace-nowrap">
+                <h1 className="text-sm sm:text-base font-black text-black tracking-tight whitespace-nowrap">
                   Untuk Kamu, Zalfa Ramadani 💜
                 </h1>
-                <p className="mt-0.5 text-[11px] text-neutral-900 font-semibold">
+                <p className="mt-0.5 text-[10px] sm:text-[11px] text-neutral-900 font-semibold">
                   Masukkan kode rahasianya
                 </p>
               </div>
 
               {/* PIN Dots */}
-              <div className="flex gap-2.5">
+              <div className="flex gap-2 sm:gap-2.5">
                 {Array.from({ length: PIN_LENGTH }, (_, i) => (
                   <div
                     key={i}
-                    className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border-2 transition-all duration-150 ${
+                    className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 transition-all duration-150 ${
                       i < entered.length
                         ? error
                           ? "bg-red-500 border-red-500 scale-110 shadow-[0_0_8px_#f87171]"
@@ -224,15 +224,15 @@ export default function PasscodeFlow() {
 
               {/* Error message */}
               {error ? (
-                <p className="text-[11px] text-red-600 font-bold -mt-2 animate-pulse">
+                <p className="text-[10px] sm:text-[11px] text-red-600 font-bold -mt-1.5 animate-pulse">
                   Kode salah, coba lagi ✗
                 </p>
               ) : (
-                <div className="h-2.5 -mt-2" />
+                <div className="h-1.5 -mt-1.5" />
               )}
 
               {/* Keypad (All Black Numbers) */}
-              <div className="grid grid-cols-3 gap-2 w-full">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 w-full">
                 {KEYS.map((key, idx) => {
                   if (key === "") return <div key={idx} />;
                   if (key === "⌫") {
@@ -241,10 +241,10 @@ export default function PasscodeFlow() {
                         key={idx}
                         onClick={handleDelete}
                         type="button"
-                        className="flex items-center justify-center h-10 sm:h-11 rounded-xl text-black bg-white/50 hover:bg-white/80 active:scale-92 transition-all border border-white/70 shadow-2xs backdrop-blur-md"
+                        className="flex items-center justify-center h-9 sm:h-10.5 rounded-xl text-black bg-white/50 hover:bg-white/80 active:scale-92 transition-all border border-white/70 shadow-2xs backdrop-blur-md"
                         aria-label="Hapus"
                       >
-                        <Delete size={18} strokeWidth={2.5} />
+                        <Delete size={17} strokeWidth={2.5} />
                       </button>
                     );
                   }
@@ -253,7 +253,7 @@ export default function PasscodeFlow() {
                       key={idx}
                       onClick={() => handleKey(key)}
                       type="button"
-                      className="flex items-center justify-center h-10 sm:h-11 rounded-xl text-base sm:text-lg font-black text-black bg-white/50 hover:bg-white/80 active:scale-92 transition-all border border-white/70 shadow-2xs backdrop-blur-md"
+                      className="flex items-center justify-center h-9 sm:h-10.5 rounded-xl text-sm sm:text-base font-black text-black bg-white/50 hover:bg-white/80 active:scale-92 transition-all border border-white/70 shadow-2xs backdrop-blur-md"
                     >
                       {key}
                     </button>
@@ -262,7 +262,7 @@ export default function PasscodeFlow() {
               </div>
 
               {/* Hint */}
-              <p className="text-[11px] text-black font-bold text-center italic -mt-1">
+              <p className="text-[10px] sm:text-[11px] text-black font-bold text-center italic -mt-0.5">
                 Petunjuk: 050909 🗓
               </p>
             </div>
@@ -272,7 +272,7 @@ export default function PasscodeFlow() {
 
       {/* ── STEP 2: Birthday Pop-up Overlay ── */}
       {step === 2 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 transition-all duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-950/60 backdrop-blur-md transition-all duration-300">
           <div
             className="w-full max-w-sm rounded-3xl p-8 flex flex-col items-center text-center gap-6 glass-popup shadow-2xl animate-fade-in"
             style={{ boxShadow: "0 12px 40px rgba(168, 85, 247, 0.18)" }}

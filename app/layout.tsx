@@ -10,13 +10,14 @@ const geistSans = Geist({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#bae6fd",
+  themeColor: "#3b0764",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
-  title: "Happy Birthday, Zalfa Ramadani 💙",
+  title: "Happy Birthday, Zalfa Ramadani 💜",
   description: "A surprise birthday website crafted with love.",
 };
 
@@ -26,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="id"
       className={`${geistSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#e0f2fe] font-sans antialiased text-[#0c4a6e]">
+      <body className="min-h-full bg-purple-50 font-sans antialiased text-purple-950">
         {children}
       </body>
     </html>

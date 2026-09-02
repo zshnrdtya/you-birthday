@@ -8,7 +8,7 @@ import { Sparkles, Heart, ArrowRight, ArrowLeft } from "lucide-react";
  * SongMeaningSection Component
  * - Dedicated aesthetic note explaining the stories & meaning behind both songs:
  *   1. "Semua Aku Dirayakan" - Nadin Amizah (Side A)
- *   2. "Shape of My Heart" - Sting (Side B)
+ *   2. "Shape of My Heart" - Backstreet Boys (Side B)
  * - Optimized, responsive Side A / Side B switcher without text overflow
  */
 export default function SongMeaningSection() {
@@ -172,7 +172,7 @@ export default function SongMeaningSection() {
               {activeSide === "A" ? "Semua Aku Dirayakan" : "Shape of My Heart"}
             </p>
             <p className="text-[11px] text-purple-300/90">
-              {activeSide === "A" ? "Nadin Amizah" : "Sting"}
+              {activeSide === "A" ? "Nadin Amizah" : "Backstreet Boys"}
             </p>
           </div>
         </div>

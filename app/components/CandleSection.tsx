@@ -9,36 +9,41 @@ export default function CandleSection() {
 
   // Trigger high-quality festive confetti explosion
   const triggerConfetti = useCallback(() => {
-    // 1. Initial center burst
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ["#a855f7", "#ec4899", "#f472b6", "#fbbf24", "#c084fc", "#e879f9"],
-      disableForReducedMotion: true,
-    });
+    try {
+      // 1. Initial center burst
+      confetti({
+        particleCount: 90,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#a855f7", "#ec4899", "#f472b6", "#fbbf24", "#c084fc", "#e879f9"],
+        zIndex: 99999,
+      });
 
-    // 2. Left and right cannons for full celebration effect
-    setTimeout(() => {
-      confetti({
-        particleCount: 50,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.65 },
-        colors: ["#c084fc", "#f472b6", "#fde047", "#a855f7"],
-      });
-      confetti({
-        particleCount: 50,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.65 },
-        colors: ["#c084fc", "#f472b6", "#fde047", "#a855f7"],
-      });
-    }, 250);
+      // 2. Left and right celebration cannons
+      setTimeout(() => {
+        confetti({
+          particleCount: 50,
+          angle: 60,
+          spread: 60,
+          origin: { x: 0.05, y: 0.65 },
+          colors: ["#c084fc", "#f472b6", "#fbbf24", "#a855f7", "#38bdf8"],
+          zIndex: 99999,
+        });
+        confetti({
+          particleCount: 50,
+          angle: 120,
+          spread: 60,
+          origin: { x: 0.95, y: 0.65 },
+          colors: ["#c084fc", "#f472b6", "#fbbf24", "#a855f7", "#38bdf8"],
+          zIndex: 99999,
+        });
+      }, 200);
+    } catch (err) {
+      console.error("Confetti launch failed:", err);
+    }
   }, []);
 
   const handleBlow = () => {
-    if (isBlown) return;
     setIsBlown(true);
     triggerConfetti();
   };
@@ -222,14 +227,25 @@ export default function CandleSection() {
               ✨ <i>Doa kamu sudah terkirim ke langit semesta! Semoga tahun ini penuh berkah, tawa, dan kebahagiaan ya Zalfa!</i> 💜
             </div>
 
-            <motion.button
-              onClick={handleRelight}
-              whileTap={{ scale: 0.95 }}
-              type="button"
-              className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-purple-700 bg-white/60 hover:bg-white/90 active:scale-95 transition-all border border-purple-200/80 shadow-xs"
-            >
-              Nyalakan Lilin Lagi 🕯️
-            </motion.button>
+            <div className="grid grid-cols-2 gap-2 w-full pt-1">
+              <motion.button
+                onClick={triggerConfetti}
+                whileTap={{ scale: 0.95 }}
+                type="button"
+                className="py-2.5 px-3 rounded-xl text-xs font-semibold text-purple-900 bg-purple-100 hover:bg-purple-200/90 active:scale-95 transition-all border border-purple-300/70 shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>Konfeti Lagi 🎉</span>
+              </motion.button>
+
+              <motion.button
+                onClick={handleRelight}
+                whileTap={{ scale: 0.95 }}
+                type="button"
+                className="py-2.5 px-3 rounded-xl text-xs font-semibold text-purple-700 bg-white/70 hover:bg-white active:scale-95 transition-all border border-purple-200/80 shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>Nyalakan Lilin 🕯️</span>
+              </motion.button>
+            </div>
           </div>
         )}
       </div>

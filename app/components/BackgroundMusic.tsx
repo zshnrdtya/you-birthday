@@ -16,7 +16,7 @@ const PLAYLIST = [
   },
   {
     title: "Shape of My Heart",
-    artist: "Sting",
+    artist: "Backstreet Boys",
     src: "/audio/shapeofmyheart.mp3",
   },
 ];
@@ -24,7 +24,7 @@ const PLAYLIST = [
 /**
  * BackgroundMusic Component (Dual-Engine Audio Crossfade & Lifecycle Architecture)
  * - Track 1: Nadin Amizah - Semua Aku Dirayakan (plays once with 4s smooth fade-in from 0 volume)
- * - Track 2: Sting - Shape of My Heart (preloaded; starts fading in 5.5s before Track 1 ends)
+ * - Track 2: Backstreet Boys - Shape of My Heart (preloaded; starts fading in 5.5s before Track 1 ends)
  * - True Overlapping Studio Crossfade (Track 1 fades 1.0 -> 0 while Track 2 fades 0 -> 1.0)
  * - Dual <audio> elements ensure zero delay, zero load gap, and zero volume resets
  * - Robust Page Lifecycle: auto-pause on tab hidden/switch, lock screen sync via MediaSession API
@@ -384,7 +384,7 @@ export default function BackgroundMusic({ autoPlayTrigger }: BackgroundMusicProp
         loop={false}
       />
 
-      {/* Track 2: Sting - Shape of My Heart */}
+      {/* Track 2: Backstreet Boys - Shape of My Heart */}
       <audio
         ref={audio2Ref}
         src="/audio/shapeofmyheart.mp3"

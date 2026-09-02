@@ -20,7 +20,7 @@ Website ini dirancang layaknya sebuah perjalanan interaktif (*emotional storytel
 ### 3. 🎧 Audio Playlist Cerdas (Seamless Crossfade & Fade-In)
 - **Mulai Otomatis Saat Kado Dibuka:** Musik pertama baru berputar begitu kotak kado diketuk, menyuguhkan momen magis.
 - **Track 1:** *Nadin Amizah — Semua Aku Dirayakan* (dengan efek *smooth fade-in* 4 detik).
-- **Track 2:** *Sting — Shape of My Heart* (secara otomatis melakukan *fade-out* halus di akhir lagu pertama lalu *fade-in* ke lagu kedua dan berputar secara *loop*).
+- **Track 2:** *Backstreet Boys — Shape of My Heart* (secara otomatis melakukan *fade-out* halus di akhir lagu pertama lalu *fade-in* ke lagu kedua dan berputar secara *loop*).
 - **Floating Glassmorphic Controller:** Tombol kontrol musik di pojok kanan atas dengan rotasi kaset/piringan hitam, sinkronisasi *MediaSession API*, serta *auto-pause* saat berpindah tab/aplikasi.
 
 ### 4. 🎂 Make a Wish & Tiup Lilin Interaktif

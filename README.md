@@ -33,13 +33,19 @@ Website ini dirancang layaknya sebuah perjalanan interaktif (*emotional storytel
   - **🌸 Side A:** Cerita dan makna mendalam di balik pemilihan lagu *“Semua Aku Dirayakan”*.
   - **💫 Side B:** Pesan tulus dan doa di balik pemilihan lagu *“Shape of My Heart”*.
 
-### 6. 📸 Galeri Foto Polaroid Interaktif
-- Kumpulan 6 foto kenangan dengan sudut miring artistik, stiker selotip warna-warni (*washi tape*), dan *caption* manis.
-- Dilengkapi fitur modal *preview / zoom* interaktif saat foto diketuk.
+### 6. 🎞️ Photostrip Photobooth Interaktif (Life 3 Cuts / Mall Edition)
+- Format photostrip vertikal ala mesin photobooth mall/Korea (Life 4 Cuts / Haru Film) yang membagi 6 foto menjadi **2 Strip eksklusif** (Strip #1: *Sweet Vibes* & Strip #2: *Memorable Cut*).
+- **Custom Frame Color:** Zalfa bisa mengganti warna kertas strip secara dinamis (*Lilac Pastel*, *Classic White*, *Sakura Pink*, *Retro Noir*, atau *Warm Cream*).
+- **View Switcher:** Pilihan tampilan *Duo Strip* (berdampingan) atau fokus ke masing-masing strip.
+- **Interaksi & Caption:** Dilengkapi barcode autentik, nomor cut film, stiker washi tape, tombol like/love, serta modal *zoom preview* lengkap dengan pesan cerita manis.
+- **📥 Download ke Galeri HP (HD PNG):** Didukung mesin **HTML5 Canvas** untuk mengunduh photostrip langsung sebagai gambar jernih beresolusi tinggi siap diunggah ke Instagram Story.
 
-### 7. 📜 Piagam Penghargaan Digital (Downloadable HD)
-- Sertifikat apresiasi resmi *"Manusia Terfavorit & Terbaik"*.
-- Menggunakan teknologi **HTML5 Canvas** sehingga piagam dapat diunduh langsung ke galeri HP/Laptop sebagai gambar PNG beresolusi tinggi (*HD Crisp Quality*).
+### 7. 🏆 Exclusive Recognition Award (3-in-1 Theme Switcher)
+- Transformasi dari sertifikat kaku menjadi 3 format dokumen penghargaan yang super gemes & kekinian:
+  - 🪪 **KTP Semesta (VIP Resident ID):** Kartu identitas penduduk semesta dengan chip emas mikrochip, NIK `0509-2009-2026`, status *Level Up (+1 Tahun)*, dan stempel hologram *Verified Cute*.
+  - 🎫 **VIP Boarding Pass:** Tiket penerbangan first-class *Zalfa Airways* rute *Umur Kemarin* ✈️ *Babak Baru Paling Bahagia*, nomor kursi `05A`, garis perforasi sobekan, dan stempel stempel retro *Boarded*.
+  - 🧾 **Aesthetic Receipt (Struk Kasir Semesta):** Struk cafe vintage dengan rincian "transaksi kebaikan" (sehat, bahagia, bebas overthinking), total tagihan Rp 0 (*Lunas Ditanggung Semesta*), dan barcode.
+- **📥 Download HD PNG untuk Ketiga Tema:** Setiap tema dapat langsung diunduh ke galeri HP dengan resolusi tinggi HD Canvas yang tajam dan presisi.
 
 ### 8. 🏮 Terbangkan Lampion Harapan & Direct WhatsApp
 - Kolom khusus bagi Zalfa untuk menuliskan impian dan doanya.

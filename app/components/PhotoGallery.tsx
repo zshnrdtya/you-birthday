@@ -13,6 +13,7 @@ import {
   Palette,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import ToastNotification, { ToastData } from "./ToastNotification";
 
 interface PhotoItem {
   id: number;
@@ -188,6 +189,11 @@ export default function PhotoGallery() {
   const [selectedTheme, setSelectedTheme] = useState<FrameTheme>(FRAME_THEMES[0]);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [toast, setToast] = useState<ToastData>({
+    show: false,
+    title: "",
+    message: "",
+  });
   const componentRef = useRef<HTMLDivElement>(null);
 
   const toggleLike = (id: number, e: React.MouseEvent) => {
@@ -506,12 +512,26 @@ export default function PhotoGallery() {
         setIsDownloading(false);
         setDownloadSuccess(true);
 
+        const stripTitle =
+          activeTab === "duo"
+            ? "Duo Photostrip (2-in-1)"
+            : activeTab === "strip1"
+            ? "Strip #1 (Sweet Vibes)"
+            : "Strip #2 (Memorable Cut)";
+
+        setToast({
+          show: true,
+          title: "Photostrip Tersimpan! 📸✨",
+          message: `${stripTitle} dengan frame ${selectedTheme.name} berhasil diunduh ke galeri!`,
+        });
+
         // Festive celebration confetti!
         confetti({
           particleCount: 70,
           spread: 70,
           origin: { y: 0.7 },
           colors: ["#a855f7", "#ec4899", "#f59e0b", "#38bdf8"],
+          zIndex: 99999,
         });
 
         setTimeout(() => setDownloadSuccess(false), 3500);
@@ -936,6 +956,12 @@ export default function PhotoGallery() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* ── Toast Notification ── */}
+      <ToastNotification
+        toast={toast}
+        onClose={() => setToast((prev) => ({ ...prev, show: false }))}
+      />
     </div>
   );
 }

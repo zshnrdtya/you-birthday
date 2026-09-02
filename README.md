@@ -46,6 +46,7 @@ Website ini dirancang layaknya sebuah perjalanan interaktif (*emotional storytel
   - 🎫 **VIP Boarding Pass:** Tiket penerbangan first-class *Zalfa Airways* rute *Umur Kemarin* ✈️ *Babak Baru Paling Bahagia*, nomor kursi `05A`, garis perforasi sobekan, dan stempel stempel retro *Boarded*.
   - 🧾 **Aesthetic Receipt (Struk Kasir Semesta):** Struk cafe vintage dengan rincian "transaksi kebaikan" (sehat, bahagia, bebas overthinking), total tagihan Rp 0 (*Lunas Ditanggung Semesta*), dan barcode.
 - **📥 Download HD PNG untuk Ketiga Tema:** Setiap tema dapat langsung diunduh ke galeri HP dengan resolusi tinggi HD Canvas yang tajam dan presisi.
+- **🔔 Floating Glassmorphic Toast Alert:** Notifikasi mengambang dengan animasi spring, countdown timer bar, dan pesan konfirmasi setiap kali foto/dokumen berhasil disimpan atau judul disalin.
 
 ### 8. 🏮 Terbangkan Lampion Harapan & Direct WhatsApp
 - Kolom khusus bagi Zalfa untuk menuliskan impian dan doanya.

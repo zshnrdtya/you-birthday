@@ -13,6 +13,7 @@ import {
   Share2,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import ToastNotification, { ToastData } from "./ToastNotification";
 
 type CertTheme = "ktp" | "boarding" | "receipt";
 
@@ -34,6 +35,11 @@ export default function BirthdayCertificate() {
   const [downloading, setDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [toast, setToast] = useState<ToastData>({
+    show: false,
+    title: "",
+    message: "",
+  });
   const certContainerRef = useRef<HTMLDivElement>(null);
 
   // Helper function to load photo into canvas
@@ -635,6 +641,18 @@ export default function BirthdayCertificate() {
         setDownloadSuccess(true);
         triggerCelebration();
 
+        const themeNameMap: Record<CertTheme, string> = {
+          ktp: "KTP Semesta (VIP Resident ID)",
+          boarding: "VIP Boarding Pass (Zalfa Airways)",
+          receipt: "Struk Belanja Semesta (Aesthetic Receipt)",
+        };
+
+        setToast({
+          show: true,
+          title: "Dokumen Berhasil Disimpan! 🏆✨",
+          message: `${themeNameMap[activeTheme]} berhasil diunduh ke galeri dalam kualitas HD!`,
+        });
+
         setTimeout(() => setDownloadSuccess(false), 3500);
       }, "image/png");
     } catch (err) {
@@ -666,6 +684,13 @@ export default function BirthdayCertificate() {
 
     navigator.clipboard.writeText(text);
     setCopied(true);
+
+    setToast({
+      show: true,
+      title: "Judul Tersalin! 📋✨",
+      message: `"${text}" siap dipaste di status atau pesan!`,
+    });
+
     setTimeout(() => setCopied(false), 2500);
   };
 
@@ -1076,6 +1101,12 @@ export default function BirthdayCertificate() {
           </span>
         </motion.button>
       </div>
+
+      {/* ── Toast Notification ── */}
+      <ToastNotification
+        toast={toast}
+        onClose={() => setToast((prev) => ({ ...prev, show: false }))}
+      />
     </motion.div>
   );
 }

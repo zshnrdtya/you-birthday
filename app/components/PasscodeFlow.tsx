@@ -45,6 +45,7 @@ export default function PasscodeFlow() {
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
   const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
+  const [giftOpened, setGiftOpened] = useState(false);
 
   // Slow dreamy slideshow timer (changes photo every 4 seconds)
   useEffect(() => {
@@ -87,8 +88,8 @@ export default function PasscodeFlow() {
 
   return (
     <>
-      {/* Background Music loaded ONLY after Step 1 is cleared */}
-      {step >= 2 && <BackgroundMusic autoPlayTrigger={true} />}
+      {/* Background Music loaded ONLY after Gift Box is tapped */}
+      {giftOpened && <BackgroundMusic autoPlayTrigger={true} />}
 
       {/* ── STEP 1: Passcode Screen with 9:16 Photo Frame & Purple Ambient BG ── */}
       {step === 1 && (
@@ -308,7 +309,7 @@ export default function PasscodeFlow() {
       {/* ── STEP 3: Gift Box Section (Lazy Loaded) ── */}
       {step === 3 && (
         <main className="w-full max-w-[480px] flex flex-col items-center my-auto py-8 transition-opacity duration-500">
-          <GiftBoxSection />
+          <GiftBoxSection onOpen={() => setGiftOpened(true)} />
         </main>
       )}
     </>

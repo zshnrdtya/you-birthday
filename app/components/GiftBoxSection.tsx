@@ -14,6 +14,10 @@ interface Sparkle {
   y: number;
 }
 
+interface GiftBoxSectionProps {
+  onOpen?: () => void;
+}
+
 // Path foto yang akan ditampilkan saat kotak dibuka
 const PHOTO_SRC = "/photos/foto4.jpeg";
 
@@ -39,7 +43,7 @@ enjoy your special day ya zalfa, have a great birthday and jangan lupa bahagia t
  * GiftBoxSection – Kotak hadiah animasi yang dibuka saat diketuk,
  * mengeluarkan sparkle, menampilkan foto spesial Zalfa, lalu kartu ucapan dengan animasi typewriter.
  */
-export default function GiftBoxSection() {
+export default function GiftBoxSection({ onOpen }: GiftBoxSectionProps = {}) {
   const [opened, setOpened] = useState(false);
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [displayedLength, setDisplayedLength] = useState(0);
@@ -47,6 +51,7 @@ export default function GiftBoxSection() {
   const handleOpen = () => {
     if (opened) return;
     setOpened(true);
+    onOpen?.();
     // Buat sparkle di posisi acak
     const newSparkles = Array.from({ length: 14 }, (_, i) => ({
       id: i,

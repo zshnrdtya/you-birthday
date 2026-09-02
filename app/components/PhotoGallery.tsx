@@ -33,8 +33,8 @@ const PHOTOS: PhotoItem[] = [
   {
     id: 3,
     src: "/photos/foto3.jpeg",
-    title: "✨ candid moment",
-    caption: "Senyuman yang bikin hati seneng 😊",
+    title: "✨ selfie photo",
+    caption: "ngga senyum aja cantik yaa😊",
     rotate: -2.5,
     tapeColor: "rgba(251, 191, 36, 0.45)",
   },

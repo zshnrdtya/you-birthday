@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CandleSection from "./CandleSection";
+import SongMeaningSection from "./SongMeaningSection";
 import PhotoGallery from "./PhotoGallery";
 import BirthdayCertificate from "./BirthdayCertificate";
 import GrandFinaleOutro from "./GrandFinaleOutro";
@@ -257,6 +258,7 @@ export default function GiftBoxSection() {
         {opened && displayedLength >= FULL_MESSAGE.length && (
           <>
             <CandleSection />
+            <SongMeaningSection />
             <PhotoGallery />
             <BirthdayCertificate />
             <GrandFinaleOutro />

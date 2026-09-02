@@ -22,347 +22,374 @@ const PLAYLIST = [
 ];
 
 /**
- * BackgroundMusic Component (Robust Audio Lifecycle Management & Playlist Queue)
- * - Step 1: Plays /audio/nadin amizah - semua aku di rayakan.mp3 once
- * - Step 2: Automatically switches to /audio/shapeofmyheart.mp3 and loops it
- * - Automatically pauses when browser/tab is hidden, minimized, switched, or closed
- *   (resolves iOS Safari / Chrome background playback issue)
- * - Syncs with Page Lifecycle, visibilitychange, pagehide, and beforeunload events
- * - Syncs with MediaSession API & native audio events
- * - Floating glassmorphism play/pause toggle button at top-right
+ * BackgroundMusic Component (Dual-Engine Audio Crossfade & Lifecycle Architecture)
+ * - Track 1: Nadin Amizah - Semua Aku Dirayakan (plays once with 4s smooth fade-in from 0 volume)
+ * - Track 2: Sting - Shape of My Heart (preloaded; starts fading in 5.5s before Track 1 ends)
+ * - True Overlapping Studio Crossfade (Track 1 fades 1.0 -> 0 while Track 2 fades 0 -> 1.0)
+ * - Dual <audio> elements ensure zero delay, zero load gap, and zero volume resets
+ * - Robust Page Lifecycle: auto-pause on tab hidden/switch, lock screen sync via MediaSession API
+ * - Floating glassmorphism disc controller with live song title and audio state
  */
 export default function BackgroundMusic({ autoPlayTrigger }: BackgroundMusicProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audio1Ref = useRef<HTMLAudioElement | null>(null);
+  const audio2Ref = useRef<HTMLAudioElement | null>(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const currentTrackIndexRef = useRef(0);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState<0 | 1>(0);
+
+  const currentTrackIndexRef = useRef<0 | 1>(0);
   const isManuallyPausedRef = useRef(false);
   const wasPlayingBeforeHiddenRef = useRef(false);
-  const isTransitioningRef = useRef(false);
-  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isCrossfadingRef = useRef(false);
+  const hasCrossfadedRef = useRef(false);
 
-  // Smooth Audio Fade-In Helper
-  const fadeInAudio = useCallback((audio: HTMLAudioElement, durationMs = 4000, targetVolume = 1.0) => {
-    if (fadeTimerRef.current) {
-      clearInterval(fadeTimerRef.current);
-      fadeTimerRef.current = null;
-    }
-    try {
-      audio.volume = 0;
-    } catch {
-      // iOS Safari ignores volume assignment safely
-    }
+  const fadeCancel1Ref = useRef<(() => void) | null>(null);
+  const fadeCancel2Ref = useRef<(() => void) | null>(null);
 
-    const intervalMs = 50;
-    const steps = durationMs / intervalMs;
-    const volumeStep = targetVolume / steps;
-    let currentVol = 0;
-
-    fadeTimerRef.current = setInterval(() => {
-      currentVol = Math.min(targetVolume, currentVol + volumeStep);
-      try {
-        audio.volume = Number(currentVol.toFixed(3));
-      } catch {
-        // Fallback for restricted platforms
-      }
-      if (currentVol >= targetVolume) {
-        if (fadeTimerRef.current) {
-          clearInterval(fadeTimerRef.current);
-          fadeTimerRef.current = null;
-        }
-      }
-    }, intervalMs);
-  }, []);
-
-  // Smooth Fade-Out & Transition to Shape of My Heart Helper
-  const fadeOutAndSwitch = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio || isTransitioningRef.current) return;
-    isTransitioningRef.current = true;
-
-    if (fadeTimerRef.current) {
-      clearInterval(fadeTimerRef.current);
-      fadeTimerRef.current = null;
-    }
-
-    const startVolume = isFinite(audio.volume) && audio.volume > 0 ? audio.volume : 1.0;
-    const durationMs = 3500; // 3.5s smooth fade out
-    const intervalMs = 50;
-    const steps = durationMs / intervalMs;
-    const volumeStep = startVolume / steps;
-    let currentVol = startVolume;
-
-    fadeTimerRef.current = setInterval(() => {
-      currentVol = Math.max(0, currentVol - volumeStep);
-      try {
-        audio.volume = Number(currentVol.toFixed(3));
-      } catch {
-        // Safe ignore on restricted devices
-      }
-
-      if (currentVol <= 0.02) {
-        if (fadeTimerRef.current) {
-          clearInterval(fadeTimerRef.current);
-          fadeTimerRef.current = null;
-        }
-
-        // Switch to Next Track (Shape of My Heart)
-        const nextIndex = currentTrackIndexRef.current + 1;
-        if (nextIndex < PLAYLIST.length) {
-          currentTrackIndexRef.current = nextIndex;
-          setCurrentTrackIndex(nextIndex);
-          audio.src = PLAYLIST[nextIndex].src;
-          audio.loop = nextIndex === PLAYLIST.length - 1;
-          try {
-            audio.volume = 0;
-          } catch {}
-          audio.load();
-          audio
-            .play()
-            .then(() => {
-              setIsPlaying(true);
-              isTransitioningRef.current = false;
-              fadeInAudio(audio, 4000, 1.0); // 4s smooth fade in for Shape of My Heart
-            })
-            .catch((err) => {
-              console.error("Error transitioning to next track:", err);
-              isTransitioningRef.current = false;
-            });
-        }
-      }
-    }, intervalMs);
-  }, [fadeInAudio]);
-
-  // Keep track index ref in sync with state
+  // Sync index ref
   useEffect(() => {
     currentTrackIndexRef.current = currentTrackIndex;
   }, [currentTrackIndex]);
 
-  // Update MediaSession metadata whenever current track changes
+  // High precision volume ramping using performance.now + requestAnimationFrame
+  const fadeVolume = useCallback(
+    (
+      audio: HTMLAudioElement,
+      targetVol: number,
+      durationMs: number,
+      onComplete?: () => void
+    ): (() => void) => {
+      let startVol = 0;
+      try {
+        startVol = isFinite(audio.volume) ? audio.volume : 0;
+      } catch {
+        startVol = 0;
+      }
+
+      const startTime = performance.now();
+      let animId: number | null = null;
+      let watchdogInterval: ReturnType<typeof setInterval> | null = null;
+
+      const step = (now: number) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / durationMs);
+
+        // Gentle sine ease curve for natural acoustic volume perception
+        const easeProgress = Math.sin((progress * Math.PI) / 2);
+        const current = startVol + (targetVol - startVol) * easeProgress;
+
+        try {
+          audio.volume = Number(Math.max(0, Math.min(1, current)).toFixed(3));
+        } catch {
+          // Ignore volume restrictions on specific mobile browsers
+        }
+
+        if (progress < 1) {
+          animId = requestAnimationFrame(step);
+        } else {
+          try {
+            audio.volume = targetVol;
+          } catch {}
+          if (watchdogInterval) clearInterval(watchdogInterval);
+          onComplete?.();
+        }
+      };
+
+      animId = requestAnimationFrame(step);
+
+      // Fallback watchdog for background/throttled tabs
+      watchdogInterval = setInterval(() => {
+        const elapsed = performance.now() - startTime;
+        if (elapsed >= durationMs) {
+          if (animId) cancelAnimationFrame(animId);
+          if (watchdogInterval) clearInterval(watchdogInterval);
+          try {
+            audio.volume = targetVol;
+          } catch {}
+          onComplete?.();
+        }
+      }, 250);
+
+      return () => {
+        if (animId) cancelAnimationFrame(animId);
+        if (watchdogInterval) clearInterval(watchdogInterval);
+      };
+    },
+    []
+  );
+
+  // Trigger studio-grade crossfade from Track 1 (Nadin) to Track 2 (Shape of My Heart)
+  const triggerCrossfade = useCallback(() => {
+    const a1 = audio1Ref.current;
+    const a2 = audio2Ref.current;
+    if (!a1 || !a2 || isCrossfadingRef.current || hasCrossfadedRef.current) return;
+
+    isCrossfadingRef.current = true;
+    hasCrossfadedRef.current = true;
+
+    // 1. Prepare Track 2 at volume 0 before calling play()
+    try {
+      a2.volume = 0;
+      a2.currentTime = 0;
+    } catch {}
+
+    const playPromise = a2.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsPlaying(true);
+          setCurrentTrackIndex(1);
+
+          // 2. Smoothly fade out Track 1 over 4.5s
+          if (fadeCancel1Ref.current) fadeCancel1Ref.current();
+          fadeCancel1Ref.current = fadeVolume(a1, 0, 4500, () => {
+            a1.pause();
+            isCrossfadingRef.current = false;
+          });
+
+          // 3. Simultaneously smoothly fade in Track 2 over 4.5s
+          if (fadeCancel2Ref.current) fadeCancel2Ref.current();
+          fadeCancel2Ref.current = fadeVolume(a2, 1.0, 4500);
+        })
+        .catch((err) => {
+          console.error("Failed to start Track 2 during crossfade:", err);
+          isCrossfadingRef.current = false;
+        });
+    }
+  }, [fadeVolume]);
+
+  // Update MediaSession metadata whenever active track changes
   useEffect(() => {
     if ("mediaSession" in navigator && "MediaMetadata" in window) {
       try {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: PLAYLIST[currentTrackIndex].title,
           artist: PLAYLIST[currentTrackIndex].artist,
-          album: "Birthday Special",
+          album: "Birthday Special for Zalfa",
         });
-      } catch (e) {
-        // Ignore MediaMetadata error if unsupported
+      } catch {
+        // Ignore unsupported metadata errors
       }
     }
   }, [currentTrackIndex]);
 
-  // Synchronize state and setup Page Lifecycle / Background listeners
+  // Setup Lifecycle, timeupdate listener, and Background listeners
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    const a1 = audio1Ref.current;
+    const a2 = audio2Ref.current;
+    if (!a1 || !a2) return;
 
-    // Native audio event listeners for state integrity
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
+    // Track 1 playback state listeners
+    const handleA1Play = () => {
+      if (currentTrackIndexRef.current === 0) setIsPlaying(true);
+    };
+    const handleA2Play = () => {
+      if (currentTrackIndexRef.current === 1) setIsPlaying(true);
+    };
+    const handleA1Pause = () => {
+      if (currentTrackIndexRef.current === 0 && !isCrossfadingRef.current) setIsPlaying(false);
+    };
+    const handleA2Pause = () => {
+      if (currentTrackIndexRef.current === 1) setIsPlaying(false);
+    };
 
-    // Monitor playback time to trigger early fade-out before Track 1 ends
-    const handleTimeUpdate = () => {
+    // Monitor Track 1 time to trigger crossfade 5.5 seconds before it finishes
+    const handleA1TimeUpdate = () => {
       if (
-        currentTrackIndexRef.current === 0 &&
-        !isTransitioningRef.current &&
-        isFinite(audio.duration) &&
-        audio.duration > 8 &&
-        audio.duration - audio.currentTime <= 4.8
+        !hasCrossfadedRef.current &&
+        !isCrossfadingRef.current &&
+        isFinite(a1.duration) &&
+        a1.duration > 8
       ) {
-        fadeOutAndSwitch();
+        // Trigger crossfade 5.5s before end, or at 54.5s for 60s track
+        if (a1.duration - a1.currentTime <= 5.5) {
+          triggerCrossfade();
+        }
       }
     };
 
-    // Auto-advance playlist safety net if song naturally ends
-    const handleEnded = () => {
-      if (isTransitioningRef.current) return;
-      const nextIndex = currentTrackIndexRef.current + 1;
-      if (nextIndex < PLAYLIST.length) {
-        currentTrackIndexRef.current = nextIndex;
-        setCurrentTrackIndex(nextIndex);
-        audio.src = PLAYLIST[nextIndex].src;
-        audio.loop = nextIndex === PLAYLIST.length - 1;
-        try {
-          audio.volume = 0;
-        } catch {}
-        audio.load();
-        audio
-          .play()
-          .then(() => {
-            setIsPlaying(true);
-            fadeInAudio(audio, 3500, 1.0);
-          })
-          .catch((err) => {
-            console.error("Error auto-playing next track:", err);
-          });
-      } else {
-        // If at the end of playlist, repeat the last track
-        audio.currentTime = 0;
-        audio.play().catch(console.error);
+    // Safety net if Track 1 ends before crossfade completed
+    const handleA1Ended = () => {
+      if (!hasCrossfadedRef.current) {
+        triggerCrossfade();
       }
     };
 
-    audio.addEventListener("play", handlePlay);
-    audio.addEventListener("pause", handlePause);
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("ended", handleEnded);
+    a1.addEventListener("play", handleA1Play);
+    a1.addEventListener("pause", handleA1Pause);
+    a1.addEventListener("timeupdate", handleA1TimeUpdate);
+    a1.addEventListener("ended", handleA1Ended);
 
-    // 1. Visibility Change: Stop audio when user leaves tab, switches app, or locks phone
+    a2.addEventListener("play", handleA2Play);
+    a2.addEventListener("pause", handleA2Pause);
+
+    // 1. Visibility Change: Pause audio when tab is hidden / minimized / screen locked
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        if (!audio.paused) {
+        const activeAudio = currentTrackIndexRef.current === 0 ? a1 : a2;
+        if (!activeAudio.paused) {
           wasPlayingBeforeHiddenRef.current = true;
-          if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-          audio.pause();
+          if (fadeCancel1Ref.current) fadeCancel1Ref.current();
+          if (fadeCancel2Ref.current) fadeCancel2Ref.current();
+          a1.pause();
+          a2.pause();
         }
       } else {
-        // User came back to the tab
+        // Returned to tab: resume active song
         if (wasPlayingBeforeHiddenRef.current && !isManuallyPausedRef.current) {
           wasPlayingBeforeHiddenRef.current = false;
-          audio.play().catch(() => {
-            // Browser autoplay restrictions may block automatic resume
-          });
+          const activeAudio = currentTrackIndexRef.current === 0 ? a1 : a2;
+          activeAudio.play().catch(() => {});
         }
       }
     };
 
-    // 2. Page Hide & Unload: Ensure audio is immediately paused when closing or navigating
+    // 2. Page Hide & Unload
     const handlePageHide = () => {
-      if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      audio.pause();
+      if (fadeCancel1Ref.current) fadeCancel1Ref.current();
+      if (fadeCancel2Ref.current) fadeCancel2Ref.current();
+      a1.pause();
+      a2.pause();
       wasPlayingBeforeHiddenRef.current = false;
-      if ("mediaSession" in navigator) {
-        navigator.mediaSession.playbackState = "paused";
-      }
     };
 
-    const handleBeforeUnload = () => {
-      if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      audio.pause();
-    };
-
-    // 3. MediaSession support (sync with OS lock screen controls)
+    // 3. MediaSession Controls
     if ("mediaSession" in navigator) {
       try {
         navigator.mediaSession.setActionHandler("play", () => {
           isManuallyPausedRef.current = false;
-          audio.play().catch(console.error);
+          const activeAudio = currentTrackIndexRef.current === 0 ? a1 : a2;
+          activeAudio.play().catch(console.error);
         });
         navigator.mediaSession.setActionHandler("pause", () => {
           isManuallyPausedRef.current = true;
-          if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-          audio.pause();
-        });
-        navigator.mediaSession.setActionHandler("stop", () => {
-          isManuallyPausedRef.current = true;
-          if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-          audio.pause();
+          a1.pause();
+          a2.pause();
         });
         navigator.mediaSession.setActionHandler("nexttrack", () => {
-          const nextIndex = (currentTrackIndexRef.current + 1) % PLAYLIST.length;
-          currentTrackIndexRef.current = nextIndex;
-          setCurrentTrackIndex(nextIndex);
-          audio.src = PLAYLIST[nextIndex].src;
-          audio.loop = nextIndex === PLAYLIST.length - 1;
-          try {
-            audio.volume = 0;
-          } catch {}
-          audio.load();
-          audio.play().then(() => {
-            fadeInAudio(audio, 2500, 1.0);
-          }).catch(console.error);
+          if (currentTrackIndexRef.current === 0) {
+            triggerCrossfade();
+          } else {
+            a2.currentTime = 0;
+            a2.play().catch(console.error);
+          }
         });
-        navigator.mediaSession.setActionHandler("previoustrack", () => {
-          const prevIndex =
-            (currentTrackIndexRef.current - 1 + PLAYLIST.length) % PLAYLIST.length;
-          currentTrackIndexRef.current = prevIndex;
-          setCurrentTrackIndex(prevIndex);
-          audio.src = PLAYLIST[prevIndex].src;
-          audio.loop = prevIndex === PLAYLIST.length - 1;
-          try {
-            audio.volume = 0;
-          } catch {}
-          audio.load();
-          audio.play().then(() => {
-            fadeInAudio(audio, 2500, 1.0);
-          }).catch(console.error);
-        });
-      } catch (e) {
-        // Ignore unsupported action handler errors
-      }
+      } catch {}
     }
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("pagehide", handlePageHide);
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("beforeunload", handlePageHide);
     window.addEventListener("freeze", handlePageHide);
 
     return () => {
-      if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      audio.removeEventListener("play", handlePlay);
-      audio.removeEventListener("pause", handlePause);
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("ended", handleEnded);
+      if (fadeCancel1Ref.current) fadeCancel1Ref.current();
+      if (fadeCancel2Ref.current) fadeCancel2Ref.current();
+
+      a1.removeEventListener("play", handleA1Play);
+      a1.removeEventListener("pause", handleA1Pause);
+      a1.removeEventListener("timeupdate", handleA1TimeUpdate);
+      a1.removeEventListener("ended", handleA1Ended);
+
+      a2.removeEventListener("play", handleA2Play);
+      a2.removeEventListener("pause", handleA2Pause);
+
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("pagehide", handlePageHide);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("beforeunload", handlePageHide);
       window.removeEventListener("freeze", handlePageHide);
 
-      // Explicit cleanup on unmount
-      audio.pause();
+      a1.pause();
+      a2.pause();
     };
-  }, [fadeInAudio, fadeOutAndSwitch]);
+  }, [triggerCrossfade]);
 
-  // Auto-play trigger when unlocked (e.g. from Passcode step) with smooth fade-in
+  // Initial Auto-Play Trigger when Gift Box is opened (Zero volume before play + 4s smooth fade-in)
   useEffect(() => {
-    if (autoPlayTrigger && audioRef.current && !isManuallyPausedRef.current) {
-      const audio = audioRef.current;
-      audio
-        .play()
-        .then(() => {
-          setIsPlaying(true);
-          fadeInAudio(audio, 4000, 1.0); // 4 seconds slow, smooth fade-in
-        })
-        .catch(() => {
-          // Autoplay policy prevented playback until explicit click
-        });
-    }
-  }, [autoPlayTrigger, fadeInAudio]);
+    if (autoPlayTrigger && !isManuallyPausedRef.current) {
+      const a1 = audio1Ref.current;
+      if (!a1) return;
 
+      // Crucial: Set volume to 0 BEFORE calling play() to prevent sudden blast
+      try {
+        a1.volume = 0;
+        a1.currentTime = 0;
+      } catch {}
+
+      const playPromise = a1.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            setCurrentTrackIndex(0);
+            if (fadeCancel1Ref.current) fadeCancel1Ref.current();
+            fadeCancel1Ref.current = fadeVolume(a1, 1.0, 4000); // 4 seconds slow, velvet-smooth fade in
+          })
+          .catch(() => {
+            // Autoplay policy prevented playback until user clicks
+          });
+      }
+    }
+  }, [autoPlayTrigger, fadeVolume]);
+
+  // Manual Play / Pause Toggle Button
   const toggleMusic = useCallback(() => {
-    if (!audioRef.current) return;
-    const audio = audioRef.current;
+    const a1 = audio1Ref.current;
+    const a2 = audio2Ref.current;
+    if (!a1 || !a2) return;
+
     if (isPlaying) {
       isManuallyPausedRef.current = true;
       wasPlayingBeforeHiddenRef.current = false;
-      if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-      audio.pause();
+      if (fadeCancel1Ref.current) fadeCancel1Ref.current();
+      if (fadeCancel2Ref.current) fadeCancel2Ref.current();
+      a1.pause();
+      a2.pause();
+      setIsPlaying(false);
     } else {
       isManuallyPausedRef.current = false;
-      if (currentTrackIndexRef.current === 0 && audio.currentTime < 4) {
-        audio.play().then(() => {
-          fadeInAudio(audio, 3000, 1.0);
-        }).catch(console.error);
+      const activeAudio = currentTrackIndexRef.current === 0 ? a1 : a2;
+
+      // If starting near the beginning, provide gentle fade-in
+      if (activeAudio.currentTime < 3) {
+        try {
+          activeAudio.volume = 0;
+        } catch {}
+        activeAudio
+          .play()
+          .then(() => {
+            setIsPlaying(true);
+            fadeVolume(activeAudio, 1.0, 3000);
+          })
+          .catch(console.error);
       } else {
         try {
-          audio.volume = 1.0;
-        } catch {
-          // safe ignore
-        }
-        audio.play().catch(console.error);
+          activeAudio.volume = 1.0;
+        } catch {}
+        activeAudio
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch(console.error);
       }
     }
-  }, [isPlaying, fadeInAudio]);
+  }, [isPlaying, fadeVolume]);
 
   return (
     <>
+      {/* Track 1: Nadin Amizah - Semua Aku Dirayakan */}
       <audio
-        ref={audioRef}
-        src={PLAYLIST[0].src}
+        ref={audio1Ref}
+        src="/audio/nadin amizah - semua aku di rayakan.mp3"
         preload="auto"
         loop={false}
+      />
+
+      {/* Track 2: Sting - Shape of My Heart */}
+      <audio
+        ref={audio2Ref}
+        src="/audio/shapeofmyheart.mp3"
+        preload="auto"
+        loop={true}
       />
 
       {/* Floating Glassmorphism Music Toggle Button */}
@@ -376,21 +403,21 @@ export default function BackgroundMusic({ autoPlayTrigger }: BackgroundMusicProp
           onClick={toggleMusic}
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-full shadow-lg transition-all duration-300"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-full shadow-lg transition-all duration-300 cursor-pointer"
           style={{
             background: isPlaying
-              ? "rgba(255, 255, 255, 0.5)"
-              : "rgba(255, 255, 255, 0.3)",
+              ? "rgba(255, 255, 255, 0.6)"
+              : "rgba(255, 255, 255, 0.35)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
-            border: "1px solid rgba(255, 255, 255, 0.6)",
+            border: "1.5px solid rgba(255, 255, 255, 0.75)",
             boxShadow: isPlaying
-              ? "0 4px 20px rgba(168, 85, 247, 0.25)"
+              ? "0 4px 20px rgba(168, 85, 247, 0.3)"
               : "0 4px 12px rgba(0, 0, 0, 0.05)",
           }}
           aria-label={isPlaying ? "Matikan musik" : "Putar musik"}
         >
-          {/* Animated Music Note / Disc */}
+          {/* Animated Spinning Vinyl Disc */}
           <motion.div
             animate={isPlaying ? { rotate: 360 } : { rotate: 0 }}
             transition={{
@@ -403,7 +430,7 @@ export default function BackgroundMusic({ autoPlayTrigger }: BackgroundMusicProp
             <Music size={15} />
           </motion.div>
 
-          <span className="text-xs font-semibold text-purple-900 hidden sm:inline-block max-w-[150px] truncate">
+          <span className="text-xs font-semibold text-purple-900 hidden sm:inline-block max-w-[155px] truncate">
             {isPlaying ? PLAYLIST[currentTrackIndex].title : "Putar Musik"}
           </span>
 
@@ -415,3 +442,4 @@ export default function BackgroundMusic({ autoPlayTrigger }: BackgroundMusicProp
     </>
   );
 }
+
